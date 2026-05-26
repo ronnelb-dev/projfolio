@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectStatus {
+  PLANNED
+  BUILDING
+  PAUSED
+  SHIPPED
+  ARCHIVED
+}
+
+enum Visibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum ProgressCategory {
+  IDEA
+  DECISION
+  PROGRESS
+  TECHNICAL_NOTE
+  DEMO
+  LAUNCH
+}
+
+enum FeatureStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum BugSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BugStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ChangelogItemType {
+  ADDED
+  CHANGED
+  FIXED
+  REMOVED
+}
+
+model UserProfile {
+  id          String   @id @default(cuid())
+  authUserId  String   @unique
+  username    String   @unique
+  displayName String
+  avatarUrl   String?
+  bio         String?
+  websiteUrl  String?
+  githubUrl   String?
+  linkedinUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projects Project[]
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  ownerId       String
+  title         String
+  slug          String
+  summary       String
+  description   String?
+  status        ProjectStatus @default(PLANNED)
+  visibility    Visibility    @default(PRIVATE)
+  techStack     String[]      @default([])
+  repoUrl       String?
+  liveDemoUrl   String?
+  coverImageUrl String?
+  startedAt     DateTime?
+  launchedAt    DateTime?
+  publishedAt   DateTime?
+  isPublished   Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  archivedAt    DateTime?
+
+  owner             UserProfile        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  progressUpdates   ProgressUpdate[]
+  screenshots       Screenshot[]
+  features          Feature[]
+  bugs              Bug[]
+  changelogReleases ChangelogRelease[]
+  caseStudy         CaseStudy?
+
+  @@unique([ownerId, slug])
+  @@index([ownerId])
+  @@index([isPublished])
+}
+
+model ProgressUpdate {
+  id         String           @id @default(cuid())
+  projectId  String
+  category   ProgressCategory @default(PROGRESS)
+  title      String
+  content    String
+  visibility Visibility       @default(PRIVATE)
+  occurredAt DateTime         @default(now())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  screenshots Screenshot[]
+
+  @@index([projectId, occurredAt])
+  @@index([visibility])
+}
+
+model Screenshot {
+  id                 String   @id @default(cuid())
+  projectId          String
+  progressUpdateId   String?
+  cloudinaryPublicId String
+  url                String
+  altText            String
+  caption            String?
+  sortOrder          Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  progressUpdate ProgressUpdate? @relation(fields: [progressUpdateId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, sortOrder])
+  @@index([progressUpdateId])
+}
+
+model Feature {
+  id          String        @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  status      FeatureStatus @default(PLANNED)
+  priority    Int           @default(0)
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status])
+}
+
+model Bug {
+  id            String      @id @default(cuid())
+  projectId     String
+  title         String
+  description   String
+  severity      BugSeverity @default(MEDIUM)
+  status        BugStatus   @default(OPEN)
+  solutionNotes String?
+  resolvedAt    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status])
+  @@index([severity])
+}
+
+model ChangelogRelease {
+  id         String    @id @default(cuid())
+  projectId  String
+  version    String?
+  title      String
+  summary    String?
+  releasedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  project Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items   ChangelogItem[]
+
+  @@index([projectId, releasedAt])
+}
+
+model ChangelogItem {
+  id        String            @id @default(cuid())
+  releaseId String
+  type      ChangelogItemType
+  content   String
+  sortOrder Int               @default(0)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  release ChangelogRelease @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@index([releaseId, sortOrder])
+}
+
+model CaseStudy {
+  id                 String    @id @default(cuid())
+  projectId          String    @unique
+  overview           String?
+  problem            String?
+  solution           String?
+  features           String?
+  technicalDecisions String?
+  lessonsLearned     String?
+  outcome            String?
+  isPublished        Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  publishedAt        DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
