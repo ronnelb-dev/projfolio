@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, CheckCircle2, Database, ImageIcon, Shield } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -70,12 +71,17 @@ export default function Home() {
                   ),
                 )}
               </div>
-              <div>
-                <Button>
-                  Day 3 can build auth next
-                  <ArrowRight className="size-4" />
-                </Button>
-              </div>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href="/signup">
+                Start with auth
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/login">Log in</Link>
+            </Button>
+          </div>
             </CardContent>
           </Card>
 
