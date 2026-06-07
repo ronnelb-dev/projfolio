@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, FolderPlus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { ProjectForm } from "@/components/projects/project-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "New project | Projfolio",
 };
 
-export default function NewProjectPlaceholderPage() {
+export default function NewProjectPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <Button asChild variant="ghost" className="w-fit">
@@ -28,28 +28,14 @@ export default function NewProjectPlaceholderPage() {
 
       <Card className="border-border bg-card">
         <CardHeader>
-          <Badge variant="secondary" className="w-fit">
-            Day 4
-          </Badge>
-          <CardTitle className="text-2xl">Project creation is next</CardTitle>
+          <CardTitle className="text-2xl">Create project</CardTitle>
           <CardDescription>
-            This protected placeholder confirms `/projects/*` routes share the app
-            shell and require a valid session.
+            Start with the core details. The evidence modules arrive after this
+            private project record exists.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="flex gap-3 rounded-lg border border-border bg-secondary/45 p-4">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-accent text-primary">
-              <FolderPlus className="size-4" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">No project form yet</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Day 4 should add the smallest complete create flow: title, slug,
-                summary, status, visibility, and redirect to project detail.
-              </p>
-            </div>
-          </div>
+        <CardContent>
+          <ProjectForm />
         </CardContent>
       </Card>
     </div>
